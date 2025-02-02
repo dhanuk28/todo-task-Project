@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Task Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
+        h1 { color: #333; }
+        #task-form { margin-bottom: 20px; }
+        input, button { padding: 10px; margin: 5px; }
+        .task-list { max-width: 400px; margin: auto; background: white; padding: 10px; border-radius: 5px; box-shadow: 2px 2px 10px gray; }
+        .task { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; }
+        .done { text-decoration: line-through; color: green; }
+    </style>
+</head>
+<body>
+
+    <h1>Employee Task Manager</h1>
+    
+    <div id="task-form">
+        <input type="text" id="task-input" placeholder="Enter task..." required>
+        <button onclick="addTask()">Add Task</button>
+    </div>
+
+    <h3>Pending Tasks: <span id="pending-count">0</span></h3>
+    <h3>Completed Tasks: <span id="completed-count">0</span></h3>
+
+    <div class="task-list" id="task-list"></div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function addTask() {
+            let taskInput = document.getElementById("task-input").value;
+            if (taskInput.trim() === "") return alert("Please enter a task!");
+            
+            let newTask = { text: taskInput, done: false };
+            tasks.push(newTask);
+            saveAndRender();
+            document.getElementById("task-input").value = ""; 
+        }
+
+        function toggleTask(index) {
+            tasks[index].done = !tasks[index].done;
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            let taskList = document.getElementById("task-list");
+            taskList.innerHTML = "";
+
+            let pendingCount = 0, completedCount = 0;
+            tasks.forEach((task, index) => {
+                let taskDiv = document.createElement("div");
+                taskDiv.classList.add("task");
+                if (task.done) taskDiv.classList.add("done");
+
+                taskDiv.innerHTML = `
+                    <span onclick="toggleTask(${index})">${task.text}</span>
+                    <button onclick="toggleTask(${index})">${task.done ? "Undo" : "Done"}</button>
+                `;
+
+                taskList.appendChild(taskDiv);
+                task.done ? completedCount++ : pendingCount++;
+            });
+
+            document.getElementById("pending-count").innerText = pendingCount;
+            document.getElementById("completed-count").innerText = completedCount;
+        }
+
+        saveAndRender();
+    </script>
+
+</body>
+</html>
